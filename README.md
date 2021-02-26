@@ -49,6 +49,7 @@ python tensor_sensing_experiment_runner.py \
 
 - Use the ```-h``` flag for information on the customizable run arguments.
   
+  
 
 
 ### 1.3 Plotting Results
@@ -119,7 +120,7 @@ python large_scale_tensor_completion_experiment_runner.py \
 --optimizer adam \
 --init_mean 1 \
 --init_std 0.001 \
---max_weights_value 1.02
+--max_test_sample_loss 4
 ```
 
 - The ```dataset_path``` run argument should point to the dataset file generated in previous step.
@@ -127,6 +128,7 @@ python large_scale_tensor_completion_experiment_runner.py \
 - A folder with checkpoints, metric plots, and a log file will be automatically created under the directory specified by the ```outputs_dir``` run argument.
 
 - Use the ```-h``` flag for information on the customizable run arguments.
+  
   
 
 

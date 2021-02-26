@@ -23,7 +23,6 @@ from common.train.trainers import SupervisedTrainer
 from tensor_factorization.datasets.large_scale_tensor_completion_datamodule import LargeScaleTensorCompletionDataModule
 from tensor_factorization.evaluation.large_scale_cp_factorization_evaluator import LargeScaleCPFactorizationEvaluator
 from tensor_factorization.models.tensor_factorizations import LargeScaleTensorCPFactorization
-from tensor_factorization.trainers.weight_clamp_callback import WeightClampCallback
 
 
 class LargeScaleTensorCompletionExperiment(ExperimentBase):
@@ -41,11 +40,12 @@ class LargeScaleTensorCompletionExperiment(ExperimentBase):
         parser.add_argument("--optimizer", type=str, default="grouprmsprop", help="Optimizer to use. Supports: 'grouprmsprop', 'adam', 'sgd'")
         parser.add_argument("--momentum", type=float, default=0, help="Momentum for SGD")
         parser.add_argument("--stop_on_zero_loss_tol", type=float, default=1e-8, help="Stops when train loss reaches below this threshold")
+        parser.add_argument("--max_test_sample_loss", type=float, default=4, help="Max per sample test error loss. If negative (default) will not "
+                                                                                   "clip loss.")
 
         parser.add_argument("--num_cp_components", type=int, default=1, help="Number of components to use in the cp factorization")
         parser.add_argument("--init_mean", type=float, default=1, help="Init mean for gaussian init")
         parser.add_argument("--init_std", type=float, default=1e-3, help="Init std for gaussian init")
-        parser.add_argument("--max_weights_value", type=float, default=-1, help="Weights magnitude constraint. (set -1 for no constraint)")
         parser.add_argument("--track_factor_norms", action="store_true",
                             help="Track cp factorization factors, components and factor column norms. Currently only supported for CP factorizaion")
 
@@ -73,7 +73,7 @@ class LargeScaleTensorCompletionExperiment(ExperimentBase):
                                  self.__get_train_loss_metric_info(config)]
         train_evaluator = SupervisedTrainEvaluator(train_metric_info_seq)
 
-        val_metric_info_seq = [metrics.MetricInfo("val_mse_loss", metrics.MSELoss(), tag="mse")]
+        val_metric_info_seq = [metrics.MetricInfo("val_loss", metrics.ClampedMSELoss(config["max_test_sample_loss"]))]
         val_dataloader = datamodule.val_dataloader()
 
         val_evaluators = [SupervisedValidationEvaluator(model, val_dataloader, val_metric_info_seq, device=device)]
@@ -125,9 +125,6 @@ class LargeScaleTensorCompletionExperiment(ExperimentBase):
                                                                                   tol=config["stop_on_zero_loss_tol"],
                                                                                   validate_every=config["validate_every"])
         callbacks_dict["terminate_on_nan"] = callbacks.TerminateOnNaN(verify_batches=False)
-
-        if config["max_weights_value"] > 0:
-            callbacks_dict["weight_clamp"] = WeightClampCallback(model, max_weights_value=config["max_weights_value"])
 
     def create_trainer(self, model: LargeScaleTensorCPFactorization, datamodule: DataModule, train_evaluator: TrainEvaluator,
                        val_evaluator: Evaluator, callback: Callback, device, config: dict, state: dict, logger: logging.Logger) -> Trainer:

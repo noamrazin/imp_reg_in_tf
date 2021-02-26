@@ -134,3 +134,17 @@ def compute_reconstruction_error(tensor: torch.Tensor, target_tensor: torch.Tens
             reconstruction_error /= target_norm
 
     return reconstruction_error
+
+
+class ClampedMSELoss(AveragedMetric):
+
+    def __init__(self, max_test_sample_loss: float):
+        super().__init__()
+        self.max_test_sample_loss = max_test_sample_loss
+
+    def _calc_metric(self, y_pred, y):
+        mse_loss = (y_pred - y) ** 2
+        if self.max_test_sample_loss > 0:
+            mse_loss = torch.clamp(mse_loss, max=self.max_test_sample_loss)
+
+        return mse_loss.mean().item(), len(y)
