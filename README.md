@@ -1,6 +1,6 @@
-# Implicit Regularization in Tensor Factorization
+# Implicit Regularization in Tensor Factorization (ICML 2021)
 
-Code, based on the PyTorch framework, for reproducing the experiments in [Implicit Regularization in Tensor Factorization](https://arxiv.org/abs/2102.09972).
+Code, based on the PyTorch framework, for reproducing the experiments in [Implicit Regularization in Tensor Factorization](https://arxiv.org/abs/2102.09972) (ICML 2021).
 
 ## Install Requirements
 Tested with python 3.8.
@@ -154,7 +154,7 @@ For citing the paper, you can use:
 @article{razin2021implicit,
   title={Implicit Regularization in Tensor Factorization},
   author={Razin, Noam and Maman, Asaf and Cohen, Nadav},
-  journal={arXiv preprint arXiv:2102.09972},
+  journal={International Conference on Machine Learning (ICML)},
   year={2021}
 }
 ```
